@@ -10,6 +10,8 @@ const rd = p => readFileSync(join(root, p), "utf8"), wr = (p, s) => writeFileSyn
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const SITE = JSON.parse(rd("content/site.json")), BASE = SITE.base;
 const promos = JSON.parse(rd("content/promos.json")).promos;
+const DIFFS = JSON.parse(rd("content/diffs.json"));
+const diffsFor = id => DIFFS.diffs.filter(d => d.scene === id).map(d => `<li><a href="diff-${d.id}.html">${esc(d.title)}</a></li>`).join("");
 for (const d of ["data/scenes", "read"]) mkdirSync(join(root, "site", d), { recursive: true });
 
 const scenes = Object.fromEntries(readdirSync(join(root, "content/scenes")).filter(f => f.endsWith(".json")).map(f => { const s = JSON.parse(rd("content/scenes/" + f)); s.subject ||= "physics"; return [s.id, s]; }));
@@ -51,7 +53,7 @@ const crumbs = items => ({ "@context": "https://schema.org", "@type": "Breadcrum
 const page = ({ title, desc, path, body, up = "../", ld = [], cls = "read" }) => `<!doctype html>
 <html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(title)} | ${SITE.name}</title><meta name="description" content="${esc(desc)}"><link rel="canonical" href="${BASE}${path}">
-<meta property="og:type" content="article"><meta property="og:locale" content="bn_BD"><meta property="og:site_name" content="${SITE.name}"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${BASE}${path}">
+<meta property="og:type" content="article"><meta property="og:locale" content="bn_BD"><meta property="og:site_name" content="${SITE.name}"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${BASE}${path}"><meta property="og:image" content="${BASE}og.jpg"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image">
 ${ld.map(o => `<script type="application/ld+json">${JSON.stringify(o).replace(/</g, "\\u003c")}</script>`).join("\n")}
 ${up === "../" ? ADS : ""}${GA}${FONTS}<link rel="stylesheet" href="${up}style.css"></head>
 <body class="${cls}">${MENU(up)}<main>${body}</main>${FOOT(up)}</body></html>
@@ -65,12 +67,12 @@ for (const s of Object.values(scenes)) {
 <div class="cta"><a class="btn primary" href="../scene.html?s=${s.id}">৩ডিতে ঘুরিয়ে দেখো</a></div>
 <p class="${s.reviewed_by ? "ok" : "draft"}">${s.reviewed_by ? `যাচাই করেছেন: ${esc(s.reviewed_by)}` : "খসড়া: এই লেখা এখনো শিক্ষকের যাচাই হয়নি। পাঠ্যবইয়ের সাথে মিলিয়ে নাও।"}</p>
 <h2>মূল ধারণা</h2><p>${r.idea}</p>${AD}
-<h2>সূত্র</h2>${list(r.formula)}<h2>উদাহরণ</h2><p>${r.example}</p>
+<h2>সূত্র</h2>${list(r.formula)}<h2>উদাহরণ</h2><p>${r.example}</p>${r.example2 ? `<p>${r.example2}</p>` : ""}${r.real ? `<h2>বাস্তব জীবনে</h2><p>${r.real}</p>` : ""}${r.how ? `<h2>পরীক্ষায় যেভাবে আসে ও সমাধানের ধাপ</h2><p>${r.how}</p>` : ""}
 <h2>যে ভুলগুলো সাধারণত হয়</h2>${list(r.mistakes)}
-<h2>নিজেকে যাচাই করো</h2>${s.questions.map((q, i) => `<details class="qa"><summary>${i + 1}. ${q.q}</summary><ol class="opts">${q.options.map((o, k) => `<li${k === q.answer ? ' class="right"' : ""}>${o}</li>`).join("")}</ol><p>${q.why}</p></details>`).join("")}
+${r.summary ? `<h2>সংক্ষেপে মনে রাখো</h2>${list(r.summary)}` : ""}<h2>নিজেকে যাচাই করো</h2>${s.questions.map((q, i) => `<details class="qa"><summary>${i + 1}. ${q.q}</summary><ol class="opts">${q.options.map((o, k) => `<li${k === q.answer ? ' class="right"' : ""}>${o}</li>`).join("")}</ol><p>${q.why}</p></details>`).join("")}
 <h2>প্রশ্নোত্তর</h2>${r.faq.map(f => `<h3>${f.q}</h3><p>${f.a}</p>`).join("")}
 ${AD}<section class="rows">${promo("read", s.ssc)}</section>
-<h2>আরও দৃশ্য</h2><ul class="list"><li><a href="${w.hub.replace("read/", "")}">${esc(w.c.name)}: অধ্যায়ের সব দৃশ্য</a></li>${rel.map(id => `<li><a href="${id}.html">${esc(scenes[id].title_bn)} <small>${esc(scenes[id].title_en)}</small></a></li>`).join("")}</ul>`;
+<h2>আরও দৃশ্য</h2><ul class="list">${diffsFor(s.id)}<li><a href="${w.hub.replace("read/", "")}">${esc(w.c.name)}: অধ্যায়ের সব দৃশ্য</a></li>${rel.map(id => `<li><a href="${id}.html">${esc(scenes[id].title_bn)} <small>${esc(scenes[id].title_en)}</small></a></li>`).join("")}</ul>`;
   wr(`site/${path}`, page({ title: `${s.title_bn} (${s.title_en})`, desc: `${s.title_bn}: ${s.intro}`, path, body,
     ld: [crumbs([[SITE.name, ""], ["পড়ো", "read/index.html"], [s.title_bn, path]]),
       { "@context": "https://schema.org", "@type": "Article", headline: `${s.title_bn} (${s.title_en})`, inLanguage: "bn", isAccessibleForFree: true, publisher: { "@type": "Organization", name: "Board & Beyond", url: "https://bandb.academy/" }, mainEntityOfPage: BASE + path },
@@ -90,7 +92,23 @@ for (const [path, { w, list: ss }] of Object.entries(hubs)) {
 const idx = cfg.subjects.map(sub => `<h2 id="${sub.id}">${esc(sub.name)}</h2>${sub.papers.map((pp, pi) => `<h3>${esc(pp.name)}</h3><ul class="list">${pp.chapters.filter(c => c.scenes.length).map(c =>
   `<li><a href="${sub.id}-${pi + 1}-${c.no}.html">${c.no}. ${esc(c.name)}</a> <small>${c.scenes.map(id => `<a href="${id}.html">${esc(scenes[id].title_bn)}</a>`).join(" · ")}</small></li>`).join("")}</ul>`).join("")}`).join("");
 wr("site/read/index.html", page({ title: "সব পাঠ ও ব্যাখ্যা", desc: "HSC পদার্থবিজ্ঞান, রসায়ন ও জীববিজ্ঞানের ৩ডি দৃশ্যের বাংলা ব্যাখ্যা, সূত্র, উদাহরণ ও কুইজ।", path: "read/index.html",
-  body: `<h1>সব পাঠ ও ব্যাখ্যা</h1><p class="lead">প্রতিটি দৃশ্যের সাথে সূত্র, উদাহরণ, সাধারণ ভুল ও কুইজ।</p>${idx}${AD}<section class="rows">${promo("read", true)}</section>`, ld: [crumbs([[SITE.name, ""], ["পড়ো", "read/index.html"]])] }));
+  body: `<h1>সব পাঠ ও ব্যাখ্যা</h1><p class="lead">প্রতিটি দৃশ্যের সাথে সূত্র, উদাহরণ, সাধারণ ভুল ও কুইজ। <a href="diffs.html">সব পার্থক্য</a> · <a href="remember.html">মনে রাখার তালিকা</a></p>${idx}${AD}<section class="rows">${promo("read", true)}</section>`, ld: [crumbs([[SITE.name, ""], ["পড়ো", "read/index.html"]])] }));
+
+// difference tables and the remember-it page (no ads on these short pages)
+for (const d of DIFFS.diffs) {
+  if (!scenes[d.scene]) throw new Error(`diff ${d.id}: unknown scene ${d.scene}`);
+  const path = `read/diff-${d.id}.html`;
+  wr(`site/${path}`, page({ title: d.title, desc: `${d.title}: ${d.intro}`, path, ld: [crumbs([[SITE.name, ""], ["পার্থক্য", "read/diffs.html"], [d.title, path]])],
+    body: `<p class="en">${esc(d.subject)} · পার্থক্য</p><h1>${esc(d.title)}</h1><p class="lead">${esc(d.intro)}</p>
+<div class="tablewrap"><table><thead><tr>${d.cols.map(c => `<th>${c}</th>`).join("")}</tr></thead><tbody>${d.rows.map(r => `<tr>${r.map((c, i) => i ? `<td>${c}</td>` : `<th scope="row">${c}</th>`).join("")}</tr>`).join("")}</tbody></table></div>
+<div class="cta"><a class="btn primary" href="../scene.html?s=${d.scene}">৩ডিতে দেখো</a><a class="btn ghost" href="${d.scene}.html">পুরো ব্যাখ্যা পড়ো</a></div>` }));
+  urls.push(path);
+}
+wr("site/read/diffs.html", page({ title: "সব পার্থক্য এক জায়গায়", desc: "পরীক্ষায় বারবার আসা পার্থক্যের তালিকা: পদার্থবিজ্ঞান, রসায়ন ও জীববিজ্ঞান।", path: "read/diffs.html", ld: [crumbs([[SITE.name, ""], ["পার্থক্য", "read/diffs.html"]])],
+  body: `<h1>সব পার্থক্য এক জায়গায়</h1><p class="lead">দুটি জিনিসের তুলনা সারণিতে দেখো।</p>${["পদার্থবিজ্ঞান", "রসায়ন", "জীববিজ্ঞান"].map(sub => `<h2>${sub}</h2><ul class="list">${DIFFS.diffs.filter(d => d.subject === sub).map(d => `<li><a href="diff-${d.id}.html">${esc(d.title)}</a></li>`).join("")}</ul>`).join("")}` }));
+wr("site/read/remember.html", page({ title: "মনে রাখার তালিকা", desc: "পদার্থবিজ্ঞানের ধ্রুবক, রসায়নের সংখ্যা ও জীববিজ্ঞানের তালিকা এক পাতায়।", path: "read/remember.html", ld: [crumbs([[SITE.name, ""], ["মনে রাখো", "read/remember.html"]])],
+  body: `<h1>মনে রাখার তালিকা</h1><p class="lead">পরীক্ষার আগে একবার চোখ বুলিয়ে নেওয়ার জন্য।</p>${DIFFS.remember.map(g => `<h2>${esc(g.title)}</h2>${list(g.items)}`).join("")}` }));
+urls.push("read/diffs.html", "read/remember.html");
 
 // concept map: scenes as dots on a ring per subject, lines for "related"
 {

@@ -147,3 +147,9 @@ body.read .sitetop { max-width: 720px; margin: 0 auto; }
 .map svg { width: 100%; height: auto; } .map a { cursor: pointer; }
 body.read .sitefoot { max-width: 720px; margin: 0 auto; }
 .handcam ~ .stagebtn, .handcam ~ .reset, .handcam ~ .tour { display: none; }
+
+.tablewrap { overflow-x: auto; margin: 18px 0; }
+table { border-collapse: collapse; width: 100%; font-size: 16px; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+thead th { color: var(--lamp); font: 600 15px/1.4 var(--display); border-bottom-color: var(--dim); }
+tbody th { font-weight: 600; color: var(--dim); }
