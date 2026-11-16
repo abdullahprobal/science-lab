@@ -1,0 +1,9 @@
+{
+  "_note": "Shown after a quiz and at the foot of reading pages, never on a scene screen. slot: quiz | read. ssc: only for scenes tagged ssc.",
+  "promos": [
+    { "slot": "quiz", "ssc": true, "title": "Board Radar বই", "text": "বোর্ড প্রশ্ন বিশ্লেষণ করে সাজানো SSC সাজেশন বই।", "label": "বই দেখো", "url": "https://bandb.academy/products" },
+    { "slot": "quiz", "title": "Board & Beyond কোর্স", "text": "অভিজ্ঞ ভাইয়া-আপুদের সাথে অনলাইন ক্লাস।", "label": "কোর্স দেখো", "url": "https://bandb.academy/" },
+    { "slot": "read", "title": "এক্স-রে বায়োলজি", "text": "ক্যামেরায় নিজের শরীরে হাড় আর অঙ্গ দেখো।", "label": "খুলে দেখো", "url": "https://biology.bandb.academy/" },
+    { "slot": "read", "title": "StoryVocabs", "text": "গল্পে গল্পে ইংরেজি শব্দ শেখো।", "label": "ঘুরে দেখো", "url": "https://storyvocabs.com/" }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "_note": "Fill adsense_client (ca-pub-...) only after AdSense approves the site; fill ga_id (G-...) to turn on analytics. Empty = off.",
+  "base": "https://lab.bandb.academy/",
+  "name": "বিজ্ঞান ল্যাব",
+  "adsense_client": "",
+  "ga_id": ""
+}
